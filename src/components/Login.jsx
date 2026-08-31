@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -19,8 +19,8 @@ function Login() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        username: username,
-        password: password
+        username,
+        password
       })
     })
       .then((response) => {
@@ -35,11 +35,16 @@ function Login() {
 
         localStorage.setItem("token", data.data.token);
 
+        // Tell App.jsx that the user is now logged in
+        onLogin();
+
         setMessage("Login successful!");
 
+        // Redirect to products
         navigate("/products");
       })
       .catch((error) => {
+        console.error(error);
         setMessage(error.message);
       });
   }
@@ -57,6 +62,7 @@ function Login() {
             type="text"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
+            required
           />
         </div>
 
@@ -70,6 +76,7 @@ function Login() {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            required
           />
         </div>
 
