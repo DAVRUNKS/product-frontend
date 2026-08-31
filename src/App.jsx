@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -60,6 +60,10 @@ function App() {
     Boolean(localStorage.getItem("token"))
   );
 
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   function handleLogin() {
     setIsLoggedIn(true);
   }
@@ -67,7 +71,48 @@ function App() {
   function handleLogout() {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    setProducts([]);
   }
+
+  function fetchProducts() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    fetch("https://refact-product-2.onrender.com/products", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load products");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setProducts(data.data);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError(error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchProducts();
+    }
+  }, [isLoggedIn]);
 
   return (
     <BrowserRouter>
@@ -98,7 +143,14 @@ function App() {
           path="/products"
           element={
             isLoggedIn ? (
-              <Products />
+              <Products
+                products={products}
+                onProductAdded={fetchProducts}
+                onDelete={fetchProducts}
+                onEdit={fetchProducts}
+                loading={loading}
+                error={error}
+              />
             ) : (
               <Navigate to="/login" />
             )
@@ -115,4 +167,3 @@ function App() {
 }
 
 export default App;
-
