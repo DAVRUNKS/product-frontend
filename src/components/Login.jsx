@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const navigate = useNavigate();
-
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+
+  const navigate = useNavigate();
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -35,7 +35,7 @@ function Login() {
 
         localStorage.setItem("token", data.data.token);
 
-        window.dispatchEvent(new Event("login"));
+        setMessage("Login successful!");
 
         navigate("/products");
       })
@@ -45,7 +45,7 @@ function Login() {
   }
 
   return (
-    <div className="form-container">
+    <div>
       <h2>Login</h2>
 
       <form onSubmit={handleSubmit}>
@@ -81,10 +81,6 @@ function Login() {
       </form>
 
       {message && <p>{message}</p>}
-
-      <p>
-        Don't have an account? <a href="/register">Register</a>
-      </p>
     </div>
   );
 }
